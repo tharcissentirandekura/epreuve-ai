@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { data } from "./data/data";
 import Question from "./components/Questions";
+import GeminiChat from "./components/GeminiChat";
 import type { ExamData, Answers } from "./types/exam";
 
 const QUESTIONS_PER_PAGE = 2;
@@ -10,6 +11,7 @@ function App() {
   const [answers, setAnswers] = useState<Answers>({});
   const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     setExam(data.data);
@@ -81,6 +83,14 @@ function App() {
 
   const overallProgress = Math.round((totalAnswered / totalQuestionsCount) * 100);
 
+  // Get current question for chat context
+  const getCurrentQuestion = () => {
+    if (visibleQuestions.length > 0) {
+      return visibleQuestions[0]; // Pass the first visible question as context
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
@@ -93,11 +103,22 @@ function App() {
             <p className="text-xl text-gray-600 font-medium">
               {exam.year} • {exam.exam_type}
             </p>
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              <span>AI-powered feedback and explanations available</span>
+            <div className="mt-4 flex items-center justify-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>AI-powered feedback and explanations available</span>
+              </div>
+              <button
+                onClick={() => setIsChatOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Chat with AI Tutor
+              </button>
             </div>
           </div>
 
@@ -150,9 +171,21 @@ function App() {
                 </h2>
                 <p className="text-blue-100 text-lg">{section.title}</p>
               </div>
-              <div className="text-right">
-                <div className="text-sm opacity-90 mb-1">Section Progress</div>
-                <div className="text-2xl font-bold">{progress}%</div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsChatOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 font-medium"
+                  title="Ask AI for help"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Need Help?
+                </button>
+                <div className="text-right">
+                  <div className="text-sm opacity-90 mb-1">Section Progress</div>
+                  <div className="text-2xl font-bold">{progress}%</div>
+                </div>
               </div>
             </div>
 
@@ -231,6 +264,27 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Gemini Chat Modal */}
+      <GeminiChat 
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        currentQuestion={getCurrentQuestion()}
+        currentSection={section.number}
+      />
+
+      {/* Floating Chat Button */}
+      {!isChatOpen && (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center transform hover:scale-110 z-40"
+          title="Chat with AI Tutor"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
