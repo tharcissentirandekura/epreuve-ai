@@ -1,11 +1,15 @@
+import AIFeedback from './AIFeedback';
+
 const Question = ({
   question,
   answer,
   onAnswer,
+  sectionNumber,
 }: {
   question: any;
   answer: string;
   onAnswer: (value: string) => void;
+  sectionNumber: string;
 }) => {
   if (question.question) {
     return (
@@ -53,6 +57,13 @@ const Question = ({
             </div>
           </button>
         </div>
+
+        <AIFeedback 
+          sectionNumber={sectionNumber}
+          questionLabel={question.label}
+          userAnswer={answer}
+          question={question}
+        />
       </div>
     );
   }
@@ -83,7 +94,9 @@ const Question = ({
               onClick={() => onAnswer(sub.label)}
             >
               <div className="flex items-start gap-3">
-                <span className="flex-shrink-0 font-bold text-sm bg-gray-100 text-gray-700 w-6 h-6 rounded-full flex items-center justify-center">
+                <span className={`flex-shrink-0 font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center ${
+                  answer === sub.label ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
+                }`}>
                   {sub.label}
                 </span>
                 <span className="flex-1 font-medium">{sub.question}</span>
@@ -96,6 +109,13 @@ const Question = ({
             </button>
           ))}
         </div>
+
+        <AIFeedback 
+          sectionNumber={sectionNumber}
+          questionLabel={question.label}
+          userAnswer={answer}
+          question={question}
+        />
       </div>
     );
   }
@@ -127,6 +147,13 @@ const Question = ({
             <span>{answer?.length || 0} characters</span>
           </div>
         </div>
+
+        <AIFeedback 
+          sectionNumber={sectionNumber}
+          questionLabel={question.label}
+          userAnswer={answer}
+          question={question}
+        />
       </div>
     );
   }
