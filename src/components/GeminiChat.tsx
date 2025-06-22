@@ -48,7 +48,7 @@ const GeminiChat = ({ isOpen, onClose, currentQuestion, currentSection }: Gemini
   const handleApiKeySubmit = () => {
     if (apiKey.trim()) {
       setShowApiKeyInput(false);
-      localStorage.setItem('gemini_api_key', 'AIzaSyC-kT2TS2erbtQ7_p8yzOs-m4C6LKAIlbI');
+      localStorage.setItem('gemini_api_key', apiKey);
     }
   };
 
